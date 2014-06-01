@@ -1,6 +1,6 @@
 # cpanel-emails
 
-This script retrieves & prints a list of all the email addresses of a cPanel server. The list consists of lines formatted as: owner,user,email.
+This script retrieves & prints a list of all the email addresses created in a cPanel server. The list consists of lines formatted as: owner,user,email.
 
 ## Requirements
 
@@ -21,6 +21,17 @@ Copy config. template and set program settings:
 ```
 cp config.json.default config.json
 vim config.json
+```
+
+## Execution
+
+Let it be:
+
+```
+chmod u+x cli.js
+./cli.js
+# Save the list in a file
+./cli.js > emails.csv
 ```
 
 ### Settings
