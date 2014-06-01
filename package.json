@@ -1,0 +1,12 @@
+{
+  "name": "cpanel-emails",
+  "version": "0.0.1",
+  "description": "This script retrieves & prints a list of all the email addresses of a cPanel server.",
+  "bin": "./cli.js",
+  "author": "mono",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "request": "~2.36.0"
+  }
+}
