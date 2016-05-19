@@ -41,4 +41,5 @@ chmod u+x cli.js
 
 ## How does it work?
 
-The program requests [a list of all the accounts](http://docs.cpanel.net/twiki/bin/view/SoftwareDevelopmentKit/ListAccounts#Using the JSON API) in the server, extracts the users from the list and issues a new request per user to [Email::listpopssingle](http://docs.cpanel.net/twiki/bin/view/ApiDocs/Api2/ApiEmail#=Email::listpopssingle=) to obtain all email accounts from the user's account.
+The program requests [a list of all the accounts](https://documentation.cpanel.net/display/SDK/WHM+API+1+Functions+-+listaccts) in the server, extracts the users from the list and issues a new request per user to [Email::listpopssingle](https://documentation.cpanel.net/display/SDK/cPanel+API+2+Functions+-+Email%3A%3Alistpopssingle) to obtain all email accounts from the user's account.
+

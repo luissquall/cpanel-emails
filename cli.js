@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 
-var _ = require('lodash'),
-    request = require('request');
+var _ = require('lodash');
+var request = require('request');
+var async = require('async');
 
-var config = require('./config.json'),
-    services = {},
-    reqOptions = {},
-    accounts = {},
-    emails = [],
-    count;
+var config = require('./config.json');
+var services = {};
+var reqOptions = {};
 
 services = {
-    'listaccts': config.api + 'json-api/listaccts',
-    'listpopssingle': config.api + 'json-api/cpanel?cpanel_jsonapi_user=<%= user %>&cpanel_jsonapi_module=Email&cpanel_jsonapi_func=listpopssingle'
+    'listaccts': config.api + 'json-api/listaccts?api.version=1',
+    'listpopssingle': config.api + 'json-api/cpanel?cpanel_jsonapi_apiversion=3&cpanel_jsonapi_user=<%= user %>&cpanel_jsonapi_module=Email&cpanel_jsonapi_func=list_pops'
 };
 reqOptions = {
     json: true,
@@ -24,35 +22,48 @@ reqOptions = {
 
 
 function onAccountsResponse(error, response, body) {
-    var url;
+    var data;
 
-    if (!error && response.statusCode == 200) {
-        count = body.acct.length;
-        if (count) {
-            body.acct.forEach(function(account, index) {
-                accounts[account.user] = account;
-                url = _.template(services['listpopssingle'], account);
-                request.get(_.merge({url: url}, reqOptions), onEmailsResponse.bind(null, account));
-            });
+    if (error) {
+        console.error(error);
+    } else {
+        if (response.statusCode == 200) {
+            data = body.data;
+
+            if (data.acct.length) {
+                async.eachLimit(data.acct, 3, function(account, cb) {
+                    var url = _.template(services['listpopssingle'], account);
+                    request.get(_.merge({url: url}, reqOptions), onEmailsResponse.bind(null, account, cb));
+                });
+            }
+        } else {
+            console.error('Error %s on listaccts.', response.statusCode);
         }
     }
 }
-function onEmailsResponse(account, error, response, body) {
-    var data,
-        line;
 
-    if (!error && response.statusCode == 200) {
-        data = body.cpanelresult.data;
-        if (data.length) {
-            data.forEach(function(email) {
-                line = account.owner + ',' + account.user + ',' + email.email;
-                emails.push(line);
-            });
+function onEmailsResponse(account, cb, error, response, body) {
+    var data;
+    var line;
+
+    if (error) {
+        console.error('Error ' + error);
+    } else {
+        if (response.statusCode == 200) {
+            data = body.result.data;
+
+            if (data.length) {
+                data.forEach(function(email) {
+                    line = account.owner + ',' + account.user + ',' + email.email;
+                    console.log(line);
+                });
+            }
+        } else {
+            console.error('Error %s on listpopssingle.', response.statusCode);
         }
     }
-    if (--count == 0) {
-        console.log(emails.sort().join("\n"));
-    }
+
+    cb();
 }
 
 request.get(_.merge({url: services['listaccts']}, reqOptions), onAccountsResponse);
